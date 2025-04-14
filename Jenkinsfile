@@ -61,7 +61,6 @@ pipeline {
                 sh 'docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
             }
         }
-
         // stage('Remove WP-CLI Container') {
         //     steps {
         //         sh 'docker rm -f wp_cli || true'

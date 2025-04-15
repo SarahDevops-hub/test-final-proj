@@ -35,36 +35,25 @@ pipeline {
             }
         }
 
-      
-        stage('Start SonarQube') {
+        stage('SonarCloud Analysis') {
             steps {
-                sh '''
-                docker rm -f sonarqube || true
-                docker run -d --name sonarqube \
-                    -p 9000:9000 \
-                    sonarqube:latest
-                '''
-                sleep time: 30, unit: 'SECONDS' // Allow time for SonarQube to start
-            }
-        }
-
-        stage('Run SonarQube Analysis') {
-            steps {
-                script {
-                    // Set SonarQube URL in the environment variable
-                    env.SONARQUBE_URL = "http://localhost:9000"
-
-                    // Run SonarScanner
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
+                    docker run --rm \
+                    -e SONAR_TOKEN=$SONAR_TOKEN \
+                    -v $(pwd):/usr/src \
+                    sonarsource/sonar-scanner-cli \
                     sonar-scanner \
-                        -Dsonar.projectKey=wordpress-test \
-                        -Dsonar.projectName=WordPressTestProject \
+                        -Dsonar.projectKey=your_project_key \
+                        -Dsonar.organization=your_org_key \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=$SONARQUBE_URL
+                        -Dsonar.host.url=https://sonarcloud.io \
+                        -Dsonar.login=$SONAR_TOKEN
                     '''
                 }
             }
         }
+
 
         stage('Run WP-CLI Tests') {
             steps {

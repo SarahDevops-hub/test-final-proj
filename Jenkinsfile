@@ -7,7 +7,7 @@ pipeline {
                 sh '''
                 # 1. Force remove specific containers if they exist
                 docker rm -f mysql_db wordpress_app wp_cli 2>/dev/null || true
-                 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+                 docker-compose -f docker-compose.yml -f docker-compose.prod.yml config
                # docker-compose up -d
                 '''
             }
@@ -51,16 +51,28 @@ pipeline {
             //}
        // }
 
+        stage('Check Running Containers') {
+            steps {
+                sh 'docker ps'
+            }
+        }
+
+        stage('Check Container Logs') {
+            steps {
+                sh 'docker logs wordpress_app || true'
+            }
+        }
+
         stage('Tear Down Test Environment') {
             steps {
                 sh 'docker-compose down'
             }
         }
-        //stage('Deploy to Production') {
-          //  steps {
-            //    sh 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
-            //}
-        //}
+        stage('Deploy to Production') {
+           steps {
+                sh 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
+            }
+        }
 
         // stage('Remove WP-CLI Container') {
         //     steps {

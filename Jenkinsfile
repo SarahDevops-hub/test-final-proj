@@ -3,24 +3,6 @@ pipeline {
     stages {
 
         
-        stage('Free Disk Space') {
-            steps {
-                sh '''
-                echo "Before cleanup:"
-                df -h
-
-                echo "Cleaning Docker images/containers..."
-                docker system prune -af
-
-                echo "Cleaning up old Jenkins builds EXCEPT current job..."
-                find /var/lib/jenkins/workspace -mindepth 1 -maxdepth 1 ! -name "$JOB_NAME" -exec rm -rf {} +
-
-                echo "After cleanup:"
-                df -h
-                '''
-            }
-        }
-
     
 
         stage('Setup test environment') {

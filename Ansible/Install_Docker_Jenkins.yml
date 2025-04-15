@@ -77,6 +77,49 @@
         state: present
         update_cache: yes
 
+
+
+    # Create Jenkins plugins directory
+    - name: Create Jenkins plugins directory
+      file:
+        path: /var/lib/jenkins/plugins
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: '0755'
+
+    # Install Jenkins plugins (you can add more plugins as needed)
+    - name: Install Jenkins plugins
+      get_url:
+        url: "https://updates.jenkins.io/download/plugins/{{ item }}/latest/{{ item }}.hpi"
+        dest: "/var/lib/jenkins/plugins/{{ item }}.hpi"
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+      loop:
+        - "credentials"
+        - "workflow-aggregator"
+        - "git"
+        - "github"
+        - "blueocean"
+        - "docker-workflow"
+        - "pipeline-utility-steps"
+        - "ssh-agent"
+        - "ws-cleanup"
+        - "timestamper"
+        - "ansible"
+
+    # Configure Jenkins with basic settings
+    - name: Configure Jenkins
+      template:
+        src: jenkins_config.xml.j2  # You'll need to create this template file
+        dest: /var/lib/jenkins/config.xml
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+      notify: Restart Jenkins
+
+
     - name: Start Jenkins service
       service:
         name: jenkins

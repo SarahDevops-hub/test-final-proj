@@ -35,11 +35,14 @@ pipeline {
             }
         }
 
+
+
         stage('Run SonarQube Analysis') {
             steps {
                 script {
                     // Set SonarQube URL in the environment variable
                     env.SONARQUBE_URL = "http://localhost:9000"
+
 
                     // Run SonarScanner
                     sh '''

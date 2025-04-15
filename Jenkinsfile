@@ -2,7 +2,7 @@ pipeline {
     agent any
     stages {
 
-        stages {
+        
         stage('Free Disk Space') {
             steps {
                 sh '''

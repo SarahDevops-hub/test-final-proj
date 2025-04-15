@@ -35,7 +35,23 @@ pipeline {
             }
         }
 
-        
+        stage('Run SonarQube Analysis') {
+            steps {
+                script {
+                    // Set SonarQube URL in the environment variable
+                    env.SONARQUBE_URL = "http://localhost:9000"
+
+                    // Run SonarScanner
+                    sh '''
+                    sonar-scanner \
+                        -Dsonar.projectKey=wordpress-test \
+                        -Dsonar.projectName=WordPressTestProject \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=$SONARQUBE_URL
+                    '''
+                }
+            }
+        }
 
 
 

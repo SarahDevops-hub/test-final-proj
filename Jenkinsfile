@@ -35,11 +35,24 @@ pipeline {
             }
         }
 
+      
+        stage('Start SonarQube') {
+            steps {
+                sh '''
+                docker rm -f sonarqube || true
+                docker run -d --name sonarqube \
+                    -p 9000:9000 \
+                    sonarqube:latest
+                '''
+                sleep time: 30, unit: 'SECONDS' // Allow time for SonarQube to start
+            }
+        }
+
         stage('Run SonarQube Analysis') {
             steps {
                 script {
                     // Set SonarQube URL in the environment variable
-                    SONARQUBE_URL = "http://{{ ansible_host }}:9000"
+                    env.SONARQUBE_URL = "http://localhost:9000"
 
                     // Run SonarScanner
                     sh '''
@@ -49,16 +62,6 @@ pipeline {
                         -Dsonar.sources=. \
                         -Dsonar.host.url=$SONARQUBE_URL
                     '''
-                }
-            }
-        }
-
-        stage('Run SonarQube Analysis (Post)') {
-            steps {
-                script {
-                    echo "SonarQube URL is ${env.SONARQUBE_URL}"
-                    // Run your analysis here, for example:
-                    // sh "sonar-scanner -Dsonar.host.url=${env.SONARQUBE_URL} ..."
                 }
             }
         }

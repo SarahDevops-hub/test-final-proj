@@ -12,14 +12,15 @@ pipeline {
                 echo "Cleaning Docker images/containers..."
                 docker system prune -af
 
-                echo "Cleaning up old Jenkins workspaces..."
-                rm -rf /var/lib/jenkins/workspace/*
+                echo "Cleaning up old Jenkins builds EXCEPT current job..."
+                find /var/lib/jenkins/workspace -mindepth 1 -maxdepth 1 ! -name "$JOB_NAME" -exec rm -rf {} +
 
                 echo "After cleanup:"
                 df -h
                 '''
             }
         }
+
     
 
         stage('Setup test environment') {
@@ -64,8 +65,8 @@ pipeline {
                     -v $(pwd):/usr/src \
                     sonarsource/sonar-scanner-cli \
                     sonar-scanner \
-                        -Dsonar.projectKey=your_project_key \
-                        -Dsonar.organization=your_org_key \
+                        -Dsonar.projectKey=devopsprojectteam_computer-stopre \
+                        -Dsonar.organization=evopsprojectteam \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=https://sonarcloud.io \
                         -Dsonar.login=$SONAR_TOKEN

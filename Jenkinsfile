@@ -35,14 +35,11 @@ pipeline {
             }
         }
 
-
-
         stage('Run SonarQube Analysis') {
             steps {
                 script {
                     // Set SonarQube URL in the environment variable
-                       SONARQUBE_URL = "http://{{ ansible_host }}:9000"
-
+                    SONARQUBE_URL = "http://{{ ansible_host }}:9000"
 
                     // Run SonarScanner
                     sh '''
@@ -55,7 +52,8 @@ pipeline {
                 }
             }
         }
-        stage('Run SonarQube Analysis') {
+
+        stage('Run SonarQube Analysis (Post)') {
             steps {
                 script {
                     echo "SonarQube URL is ${env.SONARQUBE_URL}"
@@ -65,8 +63,6 @@ pipeline {
             }
         }
 
-
-       
         stage('Run WP-CLI Tests') {
             steps {
                 sh '''
@@ -74,7 +70,6 @@ pipeline {
                 wp --require=/var/www/html/wp-cli-test-command.php test
                 '
                 '''
-
             }
         }
 
@@ -94,8 +89,6 @@ pipeline {
         //         sh 'docker rm -f wp_cli || true'
         //     }
         // }
-
-
     }
     post {
         always {
@@ -103,5 +96,3 @@ pipeline {
         }
     }
 }
-
-

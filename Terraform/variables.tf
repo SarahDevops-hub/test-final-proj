@@ -2,7 +2,7 @@
 
 variable "aws_region" {
   description = "AWS region"
-  default     = "eu-west-1" 
+  default     = "eu-west-3" 
 }
 
 variable "vpc_cidr" {
@@ -17,12 +17,12 @@ variable "subnet_cidr" {
 
 variable "availability_zone" {
   description = "AWS Availability Zone"
-  default     = "eu-west-1a" 
+  default     = "eu-west-3a" 
 }
 
 variable "ami_id" {
   description = "AMI ID for the EC2 instance"
-  default     = "ami-0df368112825f8d8f" 
+  default     = "ami-031e7dbab5571668f" 
 }
 
 variable "instance_type" {

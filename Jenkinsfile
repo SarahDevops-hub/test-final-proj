@@ -7,7 +7,7 @@ pipeline {
                 sh '''
                 # 1. Force remove specific containers if they exist
                 docker rm -f mysql_db wordpress_app wp_cli 2>/dev/null || true
-                 docker-compose -f docker-compose.yml -f docker-compose.prod.yml- up -d
+                 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
                # docker-compose up -d
                 '''
             }

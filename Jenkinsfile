@@ -2,6 +2,26 @@ pipeline {
     agent any
     stages {
 
+        stages {
+        stage('Free Disk Space') {
+            steps {
+                sh '''
+                echo "Before cleanup:"
+                df -h
+
+                echo "Cleaning Docker images/containers..."
+                docker system prune -af
+
+                echo "Cleaning up old Jenkins workspaces..."
+                rm -rf /var/lib/jenkins/workspace/*
+
+                echo "After cleanup:"
+                df -h
+                '''
+            }
+        }
+    
+
         stage('Setup test environment') {
             steps {
                 sh '''

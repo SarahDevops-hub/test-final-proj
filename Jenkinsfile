@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     // Set SonarQube URL in the environment variable
-                    env.SONARQUBE_URL = "http://localhost:9000"
+                    env.SONARQUBE_URL = "http://54.154.226.222/:9000"
 
 
                     // Run SonarScanner

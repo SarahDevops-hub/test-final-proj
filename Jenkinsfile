@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     // Set SonarQube URL in the environment variable
-                        env.SONARQUBE_URL = "http://54.154.226.222:9000"
+                       SONARQUBE_URL = "http://{{ ansible_host }}:9000"
 
 
                     // Run SonarScanner
@@ -55,7 +55,15 @@ pipeline {
                 }
             }
         }
-
+        stage('Run SonarQube Analysis') {
+            steps {
+                script {
+                    echo "SonarQube URL is ${env.SONARQUBE_URL}"
+                    // Run your analysis here, for example:
+                    // sh "sonar-scanner -Dsonar.host.url=${env.SONARQUBE_URL} ..."
+                }
+            }
+        }
 
 
        

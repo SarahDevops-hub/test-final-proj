@@ -119,10 +119,19 @@ pipeline {
         }
         stage('Deploy to Production') {
             steps {
-                sh 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
+                script {
+                    def publicIP = sh(
+                        script: "curl -s http://169.254.169.254/latest/meta-data/public-ipv4",
+                        returnStdout: true
+                    ).trim()
+
+                    sh 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
+
+                    echo "✅ Deployment to production completed."
+                    echo "🌐 Site URL: http://${publicIP}:8088"
+                }
             }
         }
-
         // stage('Remove WP-CLI Container') {
         //     steps {
         //         sh 'docker rm -f wp_cli || true'

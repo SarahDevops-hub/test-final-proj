@@ -88,24 +88,6 @@ pipeline {
             }
         }
 
-        stage('SonarCloud Analysis') {
-            steps {
-                echo "🧪 Starting SonarCloud analysis..."
-                sh '''
-                    docker run --rm \
-                    -e SONAR_TOKEN=${SONAR_TOKEN} \
-                    -v "$(pwd)":/usr/src \
-                    sonarsource/sonar-scanner-cli \
-                    sonar-scanner \
-                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                    -Dsonar.organization=${SONAR_ORG} \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=${SONAR_HOST} \
-                    -Dsonar.login=${SONAR_TOKEN}
-                '''
-            }
-        }
-
 
         stage('Run WP-CLI Tests') {
             steps {

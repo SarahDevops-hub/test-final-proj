@@ -50,6 +50,7 @@ pipeline {
         }
         stage('Install WordPress if not installed') {
             steps {
+                sleep time: 10, unit: 'SECONDS'
                 sh '''
                 docker compose exec -T wp-cli bash -c '
                 cd /var/www/html

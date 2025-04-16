@@ -117,7 +117,6 @@ pipeline {
                 '''
             }
         }
-
         stage('Verify Theme') {
             steps {
                 sh '''

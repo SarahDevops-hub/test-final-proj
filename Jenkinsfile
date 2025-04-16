@@ -127,38 +127,60 @@ pipeline {
         stage('Install and Setup Dummy Data') {
             steps {
                 sh '''
-                    docker-compose exec -T wp-cli bash -c '
-                        # Install and activate required plugins
-                        wp plugin install wordpress-importer --activate
-                        
-                        # Download and import sample data
+                    # Download and install importer plugin directly using WordPress container
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html/wp-content/plugins
+                        curl -O https://downloads.wordpress.org/plugin/wordpress-importer.0.8.4.zip
+                        unzip -o wordpress-importer.0.8.4.zip
+                        rm wordpress-importer.0.8.4.zip
+                        chown -R www-data:www-data wordpress-importer
+                        chmod -R 755 wordpress-importer
+                    '
+                    
+                    # Download sample data using WordPress container
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html
                         curl -O https://raw.githubusercontent.com/WPTRT/theme-unit-test/master/themeunittestdata.wordpress.xml
+                        chown www-data:www-data themeunittestdata.wordpress.xml
+                        chmod 644 themeunittestdata.wordpress.xml
+                    '
+                    
+                    # Now use wp-cli for WordPress operations
+                    docker-compose exec -T wp-cli bash -c '
+                        cd /var/www/html
+                        
+                        # Activate the importer plugin
+                        wp plugin activate wordpress-importer
+                        
+                        # Import the data
                         wp import themeunittestdata.wordpress.xml --authors=create
                         
                         # Create menus
                         wp menu create "Primary Menu"
                         wp menu create "Footer Menu"
                         
-                        # Add some pages to menus
-                        wp menu item add-post primary-menu 2  # Adds "Sample Page" to Primary Menu
-                        wp menu item add-custom primary-menu "Home" / --title="Home"
-                        wp menu item add-custom primary-menu "About" /about --title="About"
-                        wp menu item add-custom primary-menu "Contact" /contact --title="Contact"
+                        # Add menu items
+                        wp menu item add-post primary-menu 2
+                        wp menu item add-custom primary-menu "Home" --url="/"
+                        wp menu item add-custom primary-menu "About" --url="/about"
+                        wp menu item add-custom primary-menu "Contact" --url="/contact"
                         
-                        # Assign menu to theme location
+                        # Assign menu location
                         wp menu location assign primary-menu primary
                         
-                        # Update site settings
+                        # Update settings
                         wp option update posts_per_page 10
                         wp option update permalink_structure "/%postname%/"
-                        
-                        # Clean up
-                        rm themeunittestdata.wordpress.xml
-                        wp plugin deactivate wordpress-importer
-                        wp plugin uninstall wordpress-importer
-                        
-                        echo "✅ Dummy data installation completed!"
                     '
+                    
+                    # Clean up using WordPress container
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html
+                        rm -f themeunittestdata.wordpress.xml
+                        rm -rf wp-content/plugins/wordpress-importer
+                    '
+                    
+                    echo "✅ Dummy data installation completed!"
                 '''
             }
         }

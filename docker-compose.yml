@@ -50,6 +50,7 @@ services:
   wp-cli:
     image: wordpress:cli-2.7.1  # Latest version of WP-CLI
     container_name: wp_cli
+    user: "www-data"
     depends_on:
       - wordpress
     volumes:

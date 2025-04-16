@@ -73,8 +73,8 @@ pipeline {
                         wp core install \\
                             --url="${wpUrl}" \\
                             --title="Test Site" \\
-                            --admin_user="admin" \\
-                            --admin_password="admin123" \\
+                            --admin_user="devops" \\
+                            --admin_password="team" \\
                             --admin_email="admin@example.com"
                     else
                         echo "WordPress is already installed."
@@ -116,25 +116,32 @@ pipeline {
                 '''
             }
         }
-        
-        stage('Install and Activate Theme') {
+
+        stage('Activate Theme') {
             steps {
                 sh '''
                 docker-compose exec -T wp-cli bash -c '
                 cd /var/www/html
 
-                THEME_NAME="astra"
+                THEME_NAME="twentytwentyone"  # change to your preferred theme
 
                 if ! wp theme is-installed $THEME_NAME; then
                     echo "📦 Installing theme: $THEME_NAME"
-                    wp theme install $THEME_NAME --activate
+                    wp theme install $THEME_NAME
                 else
-                    echo "🎨 Theme $THEME_NAME is already installed. Activating..."
-                    wp theme activate $THEME_NAME
+                    echo "🎨 Theme $THEME_NAME is already installed."
                 fi
 
-                echo "✅ Theme $THEME_NAME is now active."
+                echo "⚡ Activating theme: $THEME_NAME"
+                wp theme activate $THEME_NAME
                 '
+                '''
+            }
+        }
+        stage('Verify Theme') {
+            steps {
+                sh '''
+                docker-compose exec -T wp-cli wp theme list --status=active
                 '''
             }
         }

@@ -112,11 +112,6 @@ pipeline {
                     docker-compose exec -T wp-cli bash -c '
                     cd /var/www/html
                     
-                    # Verify WordPress is ready
-                    until wp core is-installed; do
-                        echo "Waiting for WordPress to be ready..."
-                        sleep 5
-                    done
                     
                     THEME_NAME="astra"
                     

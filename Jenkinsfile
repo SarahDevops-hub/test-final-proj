@@ -58,11 +58,13 @@ pipeline {
                 # Install if not already installed
                 if ! wp core is-installed; then
                     wp core install \
-                        --url="http://localhost" \
+                        --url="http://13.38.84.151:3000" \
                         --title="Test Site" \
                         --admin_user="admin" \
                         --admin_password="admin123" \
                         --admin_email="admin@example.com"
+                    wp option update siteurl "http://13.38.84.151:3000"
+                        
                 else
                     echo "WordPress is already installed."
                 fi

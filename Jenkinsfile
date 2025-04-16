@@ -128,7 +128,7 @@ pipeline {
                     sh 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
 
                     echo "✅ Deployment to production completed."
-                    echo "🌐 Site URL: http://${publicIP}:8088"
+                    echo "🌐 Site URL: http://${publicIP}:3000"
                 }
             }
         }

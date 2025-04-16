@@ -70,3 +70,4 @@ volumes:
   wp_data: 
   sonarqube_data:
   sonarqube_extensions:
+

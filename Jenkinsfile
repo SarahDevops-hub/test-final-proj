@@ -61,7 +61,7 @@ pipeline {
                     sonarsource/sonar-scanner-cli \
                     sonar-scanner \
                         -Dsonar.projectKey=devopsprojectteam_computer-stopre \
-                        -Dsonar.organization=evopsprojectteam \
+                        -Dsonar.organization=devopsprojectteam \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=https://sonarcloud.io \
                         -Dsonar.login=$SONAR_TOKEN

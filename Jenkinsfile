@@ -124,10 +124,41 @@ pipeline {
                 '''
             }
         }
-        stage('Verify Theme') {
+        stage('Install and Setup Dummy Data') {
             steps {
                 sh '''
-                docker-compose exec -T wp-cli wp theme list --status=active
+                    docker-compose exec -T wp-cli bash -c '
+                        # Install and activate required plugins
+                        wp plugin install wordpress-importer --activate
+                        
+                        # Download and import sample data
+                        curl -O https://raw.githubusercontent.com/WPTRT/theme-unit-test/master/themeunittestdata.wordpress.xml
+                        wp import themeunittestdata.wordpress.xml --authors=create
+                        
+                        # Create menus
+                        wp menu create "Primary Menu"
+                        wp menu create "Footer Menu"
+                        
+                        # Add some pages to menus
+                        wp menu item add-post primary-menu 2  # Adds "Sample Page" to Primary Menu
+                        wp menu item add-custom primary-menu "Home" / --title="Home"
+                        wp menu item add-custom primary-menu "About" /about --title="About"
+                        wp menu item add-custom primary-menu "Contact" /contact --title="Contact"
+                        
+                        # Assign menu to theme location
+                        wp menu location assign primary-menu primary
+                        
+                        # Update site settings
+                        wp option update posts_per_page 10
+                        wp option update permalink_structure "/%postname%/"
+                        
+                        # Clean up
+                        rm themeunittestdata.wordpress.xml
+                        wp plugin deactivate wordpress-importer
+                        wp plugin uninstall wordpress-importer
+                        
+                        echo "✅ Dummy data installation completed!"
+                    '
                 '''
             }
         }

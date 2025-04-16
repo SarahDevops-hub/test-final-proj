@@ -77,15 +77,16 @@ pipeline {
                     sh '''
                     docker run --rm \
                     -e SONAR_TOKEN=$SONAR_TOKEN \
-                    -v $(pwd):/usr/src \
+                    -v "$(pwd)":/usr/src \
                     sonarsource/sonar-scanner-cli \
                     sonar-scanner \
-                        -Dsonar.projectKey=devopsprojectteam_computer-stopre \
-                        -Dsonar.organization=devopsprojectteam \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=https://sonarcloud.io \
-                        -Dsonar.login=$SONAR_TOKEN
+                    -Dsonar.projectKey=devopsprojectteam_computer-stopre \
+                    -Dsonar.organization=devopsprojectteam \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=https://sonarcloud.io \
+                    -Dsonar.login=$SONAR_TOKEN
                     '''
+
                 }
             }
         }

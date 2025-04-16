@@ -18,7 +18,6 @@ pipeline {
                 # 1. Force remove specific containers if they exist
                 docker rm -f mysql_db wordpress_app wp_cli 2>/dev/null || true
                 
-                docker-compose down --volumes --remove-orphans --timeout 1 2>/dev/null || true                
 
                 docker-compose up -d
                 '''

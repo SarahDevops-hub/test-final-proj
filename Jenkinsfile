@@ -27,11 +27,24 @@ pipeline {
                 '''
             }
         }
-
         stage('Install WordPress if not installed') {
             steps {
                 sh '''
                 docker compose exec -T wp-cli bash -c '
+                cd /var/www/html
+
+
+                # Create wp-config if not exists
+                if [ ! -f wp-config.php ]; then
+                    wp config create \
+                        --dbname=wp \
+                        --dbuser=root \
+                        --dbpass=example \
+                        --dbhost=mysql \
+                        --skip-check
+                fi
+
+                # Install if not already installed
                 if ! wp core is-installed; then
                     wp core install \
                         --url="http://localhost" \
@@ -46,6 +59,7 @@ pipeline {
                 '''
             }
         }
+
         stage('Wait for WordPress') {
             steps {
                 script {

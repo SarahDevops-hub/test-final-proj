@@ -3,7 +3,20 @@ pipeline {
     stages {
 
         
-    
+        stage('Free Disk Space') {
+            steps {
+                sh '''
+                set +e  # disable exit-on-error
+                echo Before cleanup:
+                df -h
+                echo Cleaning Docker images/containers...
+                docker system prune -af || true
+                echo Cleanup completed.
+                set -e  # re-enable exit-on-error if needed for later stages
+                '''
+            }
+        }
+
 
         stage('Setup test environment') {
             steps {

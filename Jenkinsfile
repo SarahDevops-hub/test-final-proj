@@ -55,6 +55,8 @@ pipeline {
                         script: "curl -s http://169.254.169.254/latest/meta-data/public-ipv4",
                         returnStdout: true
                     ).trim()
+                    echo "📡 Retrieved Public IP: [${publicIP}]"
+
 
                     def wpUrl = "http://${publicIP}:3000"
                     sleep time: 10, unit: 'SECONDS'

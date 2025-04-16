@@ -99,18 +99,6 @@ pipeline {
                 '''
             }
         }
-        stage('Fix Permissions') {
-            steps {
-                echo "🔧 Fixing file permissions..."
-                sh '''
-                docker-compose exec -T wp-cli bash -c '
-                chown -R www-data:www-data /var/www/html/wp-content
-                chmod -R 775 /var/www/html/wp-content
-                '
-                '''
-            }
-        }
-
         stage('Install and Activate Theme') {
             steps {
                 sh '''

@@ -88,7 +88,6 @@ pipeline {
             }
         }
 
-
         stage('Run WP-CLI Tests') {
             steps {
                 echo "🧪 Running WP-CLI custom tests..."

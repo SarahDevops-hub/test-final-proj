@@ -17,7 +17,6 @@ pipeline {
                 sh '''
                 # 1. Force remove specific containers if they exist
                 docker rm -f mysql_db wordpress_app wp_cli 2>/dev/null || true
-                docker-compose down --volumes --remove-orphans --timeout 1 2>/dev/null || true                
 
                 docker-compose up -d
                 '''
@@ -117,23 +116,23 @@ pipeline {
             }
         }
 
-        stage('Activate Theme') {
+        stage('Install and Activate Theme') {
             steps {
                 sh '''
                 docker-compose exec -T wp-cli bash -c '
                 cd /var/www/html
 
-                THEME_NAME="twentytwentyone"  # change to your preferred theme
+                THEME_NAME="astra"
 
                 if ! wp theme is-installed $THEME_NAME; then
                     echo "📦 Installing theme: $THEME_NAME"
-                    wp theme install $THEME_NAME
+                    wp theme install $THEME_NAME --activate
                 else
-                    echo "🎨 Theme $THEME_NAME is already installed."
+                    echo "🎨 Theme $THEME_NAME is already installed. Activating..."
+                    wp theme activate $THEME_NAME
                 fi
 
-                echo "⚡ Activating theme: $THEME_NAME"
-                wp theme activate $THEME_NAME
+                echo "✅ Theme $THEME_NAME is now active."
                 '
                 '''
             }

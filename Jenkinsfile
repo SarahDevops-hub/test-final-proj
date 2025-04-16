@@ -50,29 +50,36 @@ pipeline {
         }
         stage('Install WordPress if not installed') {
             steps {
-                sleep time: 10, unit: 'SECONDS'
-                sh '''
-                docker compose exec -T wp-cli bash -c '
-                cd /var/www/html
+                script {
+                    def publicIP = sh(
+                        script: "curl -s http://169.254.169.254/latest/meta-data/public-ipv4",
+                        returnStdout: true
+                    ).trim()
 
-                # Install if not already installed
-                if ! wp core is-installed; then
-                    wp core install \
-                        --url="http://13.38.84.151:3000" \
-                        --title="Test Site" \
-                        --admin_user="admin" \
-                        --admin_password="admin123" \
-                        --admin_email="admin@example.com"
-                    wp option update siteurl "http://13.38.84.151:3000"
-                        
-                else
-                    echo "WordPress is already installed."
-                fi
-                '
-                '''
+                    def wpUrl = "http://${publicIP}:3000"
+                    sleep time: 10, unit: 'SECONDS'
+
+                    sh """
+                    docker compose exec -T wp-cli bash -c '
+                    cd /var/www/html
+
+                    if ! wp core is-installed; then
+                        wp core install \\
+                            --url="${wpUrl}" \\
+                            --title="Test Site" \\
+                            --admin_user="admin" \\
+                            --admin_password="admin123" \\
+                            --admin_email="admin@example.com"
+                    else
+                        echo "WordPress is already installed."
+                        wp option update home "${wpUrl}"
+                        wp option update siteurl "${wpUrl}"
+                    fi
+                    '
+                    """
+                }
             }
         }
-
 
         stage('SonarCloud Analysis') {
             steps {

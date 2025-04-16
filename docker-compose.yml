@@ -67,6 +67,10 @@ services:
         chown -R www-data:www-data /var/www/html &&
         chmod -R 775 /var/www/html &&
 
+        echo "🔧 Fixing wp-content permissions..."
+        chown -R www-data:www-data /var/www/html/wp-content || true
+        chmod -R 775 /var/www/html/wp-content || true
+
         wp package install wp-cli/wp-cli
         wp --require=/var/www/html/wp-cli-test-command.php cli info
         tail -f /dev/null

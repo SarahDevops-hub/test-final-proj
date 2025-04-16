@@ -114,10 +114,8 @@ pipeline {
         stage('Install and Activate Theme') {
             steps {
                 sh '''
-                whoami
                 docker-compose exec -T --user=www-data wp-cli bash -c '
                 cd /var/www/html
-
                 THEME_NAME="astra"
 
                 if ! wp theme is-installed $THEME_NAME --allow-root; then
@@ -133,6 +131,7 @@ pipeline {
                 '''
             }
         }
+
         stage('Verify Theme') {
             steps {
                 sh '''

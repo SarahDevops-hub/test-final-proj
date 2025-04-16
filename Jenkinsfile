@@ -104,17 +104,17 @@ pipeline {
             steps {
                 sh '''
                 whoami
-                docker-compose exec -T wp-cli bash -c '
+                docker-compose exec -T --user=www-data wp-cli bash -c '
                 cd /var/www/html
 
                 THEME_NAME="astra"
 
-                if ! sudo -u www-data wp theme is-installed $THEME_NAME --allow-root; then
+                if ! wp theme is-installed $THEME_NAME --allow-root; then
                     echo "📦 Installing theme: $THEME_NAME"
-                    sudo -u www-data wp theme install $THEME_NAME --activate --allow-root
+                    wp theme install $THEME_NAME --activate --allow-root
                 else
                     echo "🎨 Theme $THEME_NAME is already installed. Activating..."
-                    sudo -u www-data wp theme activate $THEME_NAME --allow-root
+                    wp theme activate $THEME_NAME --allow-root
                 fi
 
                 echo "✅ Theme $THEME_NAME is now active."

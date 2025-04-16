@@ -122,14 +122,17 @@ pipeline {
                 docker-compose exec -T wp-cli bash -c '
                 cd /var/www/html
 
+                chown -R www-data:www-data wp-content
+                chmod -R 775 wp-content
+
                 THEME_NAME="astra"
 
-                if ! wp theme is-installed $THEME_NAME; then
+                if ! wp theme is-installed $THEME_NAME --allow-root; then
                     echo "📦 Installing theme: $THEME_NAME"
-                    wp theme install $THEME_NAME --activate
+                    wp theme install $THEME_NAME --activate --allow-root
                 else
                     echo "🎨 Theme $THEME_NAME is already installed. Activating..."
-                    wp theme activate $THEME_NAME
+                    wp theme activate $THEME_NAME --allow-root
                 fi
 
                 echo "✅ Theme $THEME_NAME is now active."

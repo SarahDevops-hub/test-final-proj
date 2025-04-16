@@ -108,7 +108,7 @@ pipeline {
                     # Download and install theme
                     docker-compose exec -T wordpress bash -c '
                         cd /var/www/html/wp-content/themes
-                        curl -O https://downloads.wordpress.org/theme/astra.4.10.0.zip
+                        curl -O https://downloads.wordpress.org/theme/ona-architecture.1.0.0.zip
                         unzip -o astra.4.10.0.zip
                         rm astra.4.10.0.zip
                         chown -R www-data:www-data astra

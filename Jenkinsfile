@@ -116,6 +116,28 @@ pipeline {
                 '''
             }
         }
+        
+        stage('Install and Activate Theme') {
+            steps {
+                sh '''
+                docker-compose exec -T wp-cli bash -c '
+                cd /var/www/html
+
+                THEME_NAME="astra"
+
+                if ! wp theme is-installed $THEME_NAME; then
+                    echo "📦 Installing theme: $THEME_NAME"
+                    wp theme install $THEME_NAME --activate
+                else
+                    echo "🎨 Theme $THEME_NAME is already installed. Activating..."
+                    wp theme activate $THEME_NAME
+                fi
+
+                echo "✅ Theme $THEME_NAME is now active."
+                '
+                '''
+            }
+        }
 
         stage('Tear Down Test Environment') {
             steps {

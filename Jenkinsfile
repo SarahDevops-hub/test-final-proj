@@ -18,6 +18,7 @@ pipeline {
                 # 1. Force remove specific containers if they exist
                 docker rm -f mysql_db wordpress_app wp_cli 2>/dev/null || true
                 
+                docker-compose down --volumes --remove-orphans --timeout 1 2>/dev/null || true                
 
                 docker-compose up -d
                 '''
@@ -98,6 +99,118 @@ pipeline {
                 '''
             }
         }
+
+
+
+
+
+
+
+
+
+        // Only install and activate theme and dummy data if WordPress is not installed
+        stage('Install and Activate Theme and Dummy Data') {
+            when {
+                expression {
+                    // Check if the theme 'astra' is installed
+                    def isThemeInstalled = sh(script: "docker-compose exec -T wp-cli wp theme list --status=inactive --fields=name | grep 'ona-architecture' || echo 'not_installed'", returnStdout: true).trim()
+                    return isThemeInstalled == 'not_installed'
+                }
+            }
+
+            steps {
+                echo "🎨 Installing theme and dummy data..."
+                sh '''
+                    # Install unzip in WordPress container
+                    docker-compose exec -T wordpress apt-get update
+                    docker-compose exec -T wordpress apt-get install -y unzip
+                    
+                    # Download and install theme
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html/wp-content/themes
+                        curl -O https://downloads.wordpress.org/theme/ona-architecture.1.0.0.zip
+                        unzip -o astra.4.10.0.zip
+                        rm astra.4.10.0.zip
+                        chown -R www-data:www-data astra
+                        chmod -R 755 astra
+                    '
+                    
+                    # Verify theme installation
+                    docker-compose exec -T wordpress ls -la /var/www/html/wp-content/themes/astra
+                    
+                    # Now activate the theme using wp-cli
+                    docker-compose exec -T wp-cli wp theme activate astra
+                '''
+
+                sh '''
+                    # Download and install importer plugin directly using WordPress container
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html/wp-content/plugins
+                        curl -O https://downloads.wordpress.org/plugin/wordpress-importer.0.8.4.zip
+                        unzip -o wordpress-importer.0.8.4.zip
+                        rm wordpress-importer.0.8.4.zip
+                        chown -R www-data:www-data wordpress-importer
+                        chmod -R 755 wordpress-importer
+                    '
+                    
+                    # Download sample data using WordPress container
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html
+                        curl -O https://raw.githubusercontent.com/WPTRT/theme-unit-test/master/themeunittestdata.wordpress.xml
+                        chown www-data:www-data themeunittestdata.wordpress.xml
+                        chmod 644 themeunittestdata.wordpress.xml
+                    '
+                    
+                    # Now use wp-cli for WordPress operations
+                    docker-compose exec -T wp-cli bash -c '
+                        cd /var/www/html
+                        
+                        # Activate the importer plugin
+                        wp plugin activate wordpress-importer
+                        
+                        # Import the data
+                        wp import themeunittestdata.wordpress.xml --authors=create
+                        
+                        # Create menus
+                        wp menu create "Primary Menu"
+                        wp menu create "Footer Menu"
+                        
+                        # Add menu items
+                        wp menu item add-post primary-menu 2
+                        wp menu item add-custom primary-menu "Home" --url="/"
+                        wp menu item add-custom primary-menu "About" --url="/about"
+                        wp menu item add-custom primary-menu "Contact" --url="/contact"
+                        
+                        # Assign menu location
+                        wp menu location assign primary-menu primary
+                        
+                        # Update settings
+                        wp option update posts_per_page 10
+                        wp option update permalink_structure "/%postname%/"
+                    '
+                    
+                    # Clean up using WordPress container
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html
+                        rm -f themeunittestdata.wordpress.xml
+                        rm -rf wp-content/plugins/wordpress-importer
+                    '
+                    
+                    echo "✅ Dummy data installation completed!"
+                '''
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
         stage('Install and Activate Theme') {
             steps {
                 sh '''

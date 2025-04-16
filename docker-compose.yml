@@ -20,18 +20,12 @@ services:
       retries: 10
 
   wordpress: 
-    build:
-      context: .
-      dockerfile: dockerfile
-      target: wordpress
-      args:
-        USER_ID: 1000 # Replace with your host user ID if needed
-        GROUP_ID: 1000 # Replace with your host group ID if needed
     image: wordpress:6.2-php8.0  # Latest stable version of WordPress with PHP 8.0
     container_name: wordpress_app 
     restart: unless-stopped  # Changed from 'always'
     depends_on: 
       - db 
+    user: root  # Allow permission changes inside the container
     environment: 
       WORDPRESS_DB_HOST: db:3306 
       WORDPRESS_DB_USER: wpuser 
@@ -55,13 +49,6 @@ services:
 
 
   wp-cli:
-    build:
-      context: .
-      dockerfile: dockerfile
-      target: wpcli
-      args:
-        USER_ID: 1000 # Replace with your host user ID if needed
-        GROUP_ID: 1000 # Replace with your host group ID if needed
     image: wordpress:cli-2.7.1  # Latest version of WP-CLI
     container_name: wp_cli
     depends_on:
@@ -69,7 +56,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ./wp-cli-test-command.php:/var/www/html/wp-cli-test-command.php 
-      - ./themes/astra.zip:/var/www/html/wp-content/themes/astra.zip
+    user: root  # Allow permission changes inside the container
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wpuser

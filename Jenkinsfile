@@ -1,27 +1,24 @@
 pipeline {
     agent any
-    stages {
 
-        stage('Free Disk Space') {
-            steps {
-                sh '''
-                set +e  # disable exit-on-error
-                echo Before cleanup:
-                df -h
-                echo Cleaning Docker images/containers...
-                docker system prune -af || true
-                echo Cleanup completed.
-                set -e  # re-enable exit-on-error if needed for later stages
-                '''
-            }
-        }
+    environment {
+        SONAR_PROJECT_KEY = 'devopsprojectteam_computer-stopre'
+        SONAR_ORG = 'devopsprojectteam'
+        SONAR_HOST = 'https://sonarcloud.io'
+        SONAR_TOKEN = credentials('SONAR_TOKEN')
+    }
+
+
+    stages {
 
         stage('Setup test environment') {
             steps {
+                echo "📦 Bringing up the test environment..."
                 sh '''
                 # 1. Force remove specific containers if they exist
                 docker rm -f mysql_db wordpress_app wp_cli 2>/dev/null || true
                 docker-compose down --volumes --remove-orphans --timeout 1 2>/dev/null || true                
+
                 docker-compose up -d
                 '''
             }
@@ -34,7 +31,7 @@ pipeline {
                     while (attempt <= maxAttempts) {
                         try {
                             sh 'docker exec wordpress_app curl -s localhost'
-                            echo "WordPress is ready!"
+                            echo "✅ WordPress is ready!"
                             break
                         } catch (Exception e) {
                             echo "Attempt ${attempt}: WordPress not ready yet, waiting..."
@@ -61,7 +58,7 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-echo "📡 Retrieved Public IP: [${publicIP}]"
+                    echo "📡 Retrieved Public IP: [${publicIP}]"
 
 
 
@@ -92,27 +89,26 @@ echo "📡 Retrieved Public IP: [${publicIP}]"
 
         stage('SonarCloud Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    sh '''
+                echo "🧪 Starting SonarCloud analysis..."
+                sh '''
                     docker run --rm \
-                    -e SONAR_TOKEN=$SONAR_TOKEN \
+                    -e SONAR_TOKEN=${SONAR_TOKEN} \
                     -v "$(pwd)":/usr/src \
                     sonarsource/sonar-scanner-cli \
                     sonar-scanner \
-                    -Dsonar.projectKey=devopsprojectteam_computer-stopre \
-                    -Dsonar.organization=devopsprojectteam \
+                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                    -Dsonar.organization=${SONAR_ORG} \
                     -Dsonar.sources=. \
-                    -Dsonar.host.url=https://sonarcloud.io \
-                    -Dsonar.login=$SONAR_TOKEN
-                    '''
-
-                }
+                    -Dsonar.host.url=${SONAR_HOST} \
+                    -Dsonar.login=${SONAR_TOKEN}
+                '''
             }
         }
 
 
         stage('Run WP-CLI Tests') {
             steps {
+                echo "🧪 Running WP-CLI custom tests..."
                 sh '''
                 docker-compose exec -T wp-cli bash -c '
                 wp --require=/var/www/html/wp-cli-test-command.php test
@@ -123,7 +119,8 @@ echo "📡 Retrieved Public IP: [${publicIP}]"
 
         stage('Tear Down Test Environment') {
             steps {
-                sh 'docker-compose down'
+                echo "🧹 Tearing down test environment..."
+                sh 'docker compose down'
             }
         }
         stage('Deploy to Production') {
@@ -143,17 +140,20 @@ echo "📡 Retrieved Public IP: [${publicIP}]"
                     sh 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d'
 
                     echo "✅ Deployment to production completed."
-                    echo "🌐 Site URL: http://${publicIP}:3000"
+                    echo "🌐 Production Site URL: http://${publicIP}:3000"
                 }
             }
         }
-        // stage('Remove WP-CLI Container') {
-        //     steps {
-        //         sh 'docker rm -f wp_cli || true'
-        //     }
-        // }
     }
     post {
+        success {
+            echo "Cleaning up workspace and Docker images..."
+            sh "docker system prune -f"
+            echo "🎉 Pipeline completed successfully!"
+        }
+        failure {
+            echo "🚨 Pipeline failed. Check logs for more info."
+        }
         always {
             cleanWs()
         }

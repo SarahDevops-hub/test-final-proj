@@ -88,6 +88,7 @@ pipeline {
             }
         }
 
+
         stage('Run WP-CLI Tests') {
             steps {
                 echo "🧪 Running WP-CLI custom tests..."
@@ -99,6 +100,31 @@ pipeline {
             }
         }
 
+        stage('Install and Activate Theme') {
+            steps {
+                sh '''
+                docker-compose exec -T wp-cli bash -c '
+                cd /var/www/html
+
+                chown -R www-data:www-data wp-content
+                chmod -R 775 wp-content
+
+                THEME_ZIP="/var/www/html/wp-content/themes/astra.zip"
+                THEME_NAME="astra"
+
+                if ! wp theme is-installed $THEME_NAME --allow-root; then
+                    echo "📦 Installing theme: $THEME_NAME from local zip"
+                    wp theme install "$THEME_ZIP" --activate --allow-root
+                else
+                    echo "🎨 Theme $THEME_NAME is already installed. Activating..."
+                    wp theme activate $THEME_NAME --allow-root
+                fi
+
+                echo "✅ Theme $THEME_NAME is now active."
+                '
+                '''
+            }
+        }
         stage('Verify Theme') {
             steps {
                 sh '''

@@ -55,7 +55,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ./wp-cli-test-command.php:/var/www/html/wp-cli-test-command.php 
-      - ./themes/astra:/var/www/html/wp-content/themes/astra
+      - ./themes/astra.zip:/var/www/html/wp-content/themes/astra.zip
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wpuser

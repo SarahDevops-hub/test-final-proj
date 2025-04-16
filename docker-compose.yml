@@ -37,6 +37,12 @@ services:
         chown -R www-data:www-data /var/www/html &&
         find /var/www/html -type d -exec chmod 775 {} \; &&
         find /var/www/html -type f -exec chmod 664 {} \; &&
+
+        # Ensure wp-content specifically is writable
+        mkdir -p /var/www/html/wp-content &&
+        chown -R www-data:www-data /var/www/html/wp-content &&
+        chmod -R 775 /var/www/html/wp-content &&
+
         docker-entrypoint.sh apache2-foreground
       '
 

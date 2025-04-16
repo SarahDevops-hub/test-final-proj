@@ -111,7 +111,7 @@ pipeline {
             when {
                 expression {
                     // Check if the theme 'astra' is installed
-                    def isThemeInstalled = sh(script: "docker-compose exec -T wp-cli wp theme list --status=inactive --fields=name | grep 'ona-architecture' || echo 'not_installed'", returnStdout: true).trim()
+                    def isThemeInstalled = sh(script: "docker-compose exec -T wp-cli wp theme list --status=active --fields=name | grep 'ona-architecture' || echo 'not_installed'", returnStdout: true).trim()
                     return isThemeInstalled == 'not_installed'
                 }
             }

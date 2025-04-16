@@ -27,6 +27,28 @@ pipeline {
                 '''
             }
         }
+        stage('Wait for WordPress') {
+            steps {
+                script {
+                    def maxAttempts = 20
+                    def attempt = 1
+                    while (attempt <= maxAttempts) {
+                        try {
+                            sh 'docker exec wordpress_app curl -s localhost'
+                            echo "WordPress is ready!"
+                            break
+                        } catch (Exception e) {
+                            echo "Attempt ${attempt}: WordPress not ready yet, waiting..."
+                            sleep time: 10, unit: 'SECONDS'
+                            attempt++
+                        }
+                    }
+                    if (attempt > maxAttempts) {
+                        error "WordPress did not become ready after ${maxAttempts} attempts."
+                    }
+                }
+            }
+        }
         stage('Install WordPress if not installed') {
             steps {
                 sh '''
@@ -60,28 +82,6 @@ pipeline {
             }
         }
 
-        stage('Wait for WordPress') {
-            steps {
-                script {
-                    def maxAttempts = 20
-                    def attempt = 1
-                    while (attempt <= maxAttempts) {
-                        try {
-                            sh 'docker exec wordpress_app curl -s localhost'
-                            echo "WordPress is ready!"
-                            break
-                        } catch (Exception e) {
-                            echo "Attempt ${attempt}: WordPress not ready yet, waiting..."
-                            sleep time: 10, unit: 'SECONDS'
-                            attempt++
-                        }
-                    }
-                    if (attempt > maxAttempts) {
-                        error "WordPress did not become ready after ${maxAttempts} attempts."
-                    }
-                }
-            }
-        }
 
         stage('SonarCloud Analysis') {
             steps {

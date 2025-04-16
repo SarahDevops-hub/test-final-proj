@@ -102,7 +102,11 @@ pipeline {
         stage('Install and Activate Theme') {
             steps {
                 sh '''
-                    # Create a temporary directory for theme download
+                    # Install unzip in WordPress container
+                    docker-compose exec -T wordpress apt-get update
+                    docker-compose exec -T wordpress apt-get install -y unzip
+                    
+                    # Download and install theme
                     docker-compose exec -T wordpress bash -c '
                         cd /var/www/html/wp-content/themes
                         curl -O https://downloads.wordpress.org/theme/astra.4.10.0.zip
@@ -111,6 +115,9 @@ pipeline {
                         chown -R www-data:www-data astra
                         chmod -R 755 astra
                     '
+                    
+                    # Verify theme installation
+                    docker-compose exec -T wordpress ls -la /var/www/html/wp-content/themes/astra
                     
                     # Now activate the theme using wp-cli
                     docker-compose exec -T wp-cli wp theme activate astra

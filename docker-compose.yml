@@ -1,7 +1,7 @@
  
 services: 
   db: 
-    image: mysql:5.7 
+    image: mysql:5.7.41  # Latest stable version of MySQL (5.7.x)
     container_name: mysql_db 
     restart: unless-stopped  # Changed from 'always'
     environment: 
@@ -20,7 +20,7 @@ services:
       retries: 10
 
   wordpress: 
-    image: wordpress:latest 
+    image: wordpress:6.2-php8.0  # Latest stable version of WordPress with PHP 8.0
     container_name: wordpress_app 
     restart: unless-stopped  # Changed from 'always'
     depends_on: 
@@ -42,7 +42,7 @@ services:
 
 
   wp-cli:
-    image: wordpress:cli
+    image: wordpress:cli-2.7.1  # Latest version of WP-CLI
     container_name: wp_cli
     depends_on:
       - wordpress

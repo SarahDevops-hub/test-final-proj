@@ -26,6 +26,25 @@ pipeline {
                 '''
             }
         }
+
+        stage('Install WordPress if not installed') {
+            steps {
+                sh '''
+                docker compose exec -T wp-cli bash -c '
+                if ! wp core is-installed; then
+                    wp core install \
+                        --url="http://localhost" \
+                        --title="Test Site" \
+                        --admin_user="admin" \
+                        --admin_password="admin123" \
+                        --admin_email="admin@example.com"
+                else
+                    echo "WordPress is already installed."
+                fi
+                '
+                '''
+            }
+        }
         stage('Wait for WordPress') {
             steps {
                 script {

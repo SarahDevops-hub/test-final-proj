@@ -103,6 +103,7 @@ pipeline {
         stage('Install and Activate Theme') {
             steps {
                 sh '''
+                whoami
                 docker-compose exec -T wp-cli bash -c '
                 cd /var/www/html
 

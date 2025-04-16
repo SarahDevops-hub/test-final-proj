@@ -52,10 +52,17 @@ pipeline {
             steps {
                 script {
                     def publicIP = sh(
-                        script: "curl -s http://169.254.169.254/latest/meta-data/public-ipv4",
+                        script: '''
+                            TOKEN=$(curl -sX PUT "http://169.254.169.254/latest/api/token" \\
+                                -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+                            curl -sH "X-aws-ec2-metadata-token: $TOKEN" \\
+                                http://169.254.169.254/latest/meta-data/public-ipv4
+                        ''',
                         returnStdout: true
                     ).trim()
-                    echo "📡 Retrieved Public IP: [${publicIP}]"
+
+echo "📡 Retrieved Public IP: [${publicIP}]"
+
 
 
                     def wpUrl = "http://${publicIP}:3000"

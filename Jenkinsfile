@@ -124,7 +124,18 @@ pipeline {
                     # Install unzip in WordPress container
                     docker-compose exec -T wordpress apt-get update
                     docker-compose exec -T wordpress apt-get install -y unzip
-                    
+
+
+                    # Download and install theme
+                    docker-compose exec -T wordpress bash -c '
+                        cd /var/www/html/wp-content/themes
+                        curl -O https://downloads.wordpress.org/theme/ona.23.2.zip
+                        unzip -o ona.23.2.zip
+                        rm ona.23.2.zip
+                        chown -R www-data:www-data ona
+                        chmod -R 755 ona
+                    '
+
                     # Download and install theme
                     docker-compose exec -T wordpress bash -c '
                         cd /var/www/html/wp-content/themes

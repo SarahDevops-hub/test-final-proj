@@ -2,7 +2,6 @@ pipeline {
     agent any
     stages {
 
-        
         stage('Free Disk Space') {
             steps {
                 sh '''
@@ -16,7 +15,6 @@ pipeline {
                 '''
             }
         }
-
 
         stage('Setup test environment') {
             steps {
